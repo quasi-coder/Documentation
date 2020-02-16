@@ -1,0 +1,136 @@
+Chapter4_Part_1
+
+Method(Part1)
+
+Item1: Check parameters for validity(Do the validation at the begining of the method body)
+	   -Index values must be non-negative and object references must be non-null(Illegal Argument, IndexOutOfBound, NullPointerException)
+	   -Non-public methods should do teh parameter validations by assertions. Assertions will be invoked only when you pass the -ea parameter to JVM
+
+	   //Private helper function for the recursive sort
+
+	   private static void sort(long a[], int offset,int length){
+	   	assert a!=null;
+	   	assert offset>=0 && offset<=a.length;
+	   	assert length >=0 && length <=a.length - offset;
+
+	   	...//Do the computation 
+	   }
+
+Item2: Make defensive copies when needed
+
+//public final class Period {
+
+private final Date start;//mutable parameter
+
+private final Date end; //mutable parameter
+
+public Period(Date start,Date end){
+	this.start = new Date(start.getTime());//make defensive copies of mutable parameters before checking the validity of the parameters 
+												and the validity is performed on the copies rather than on the originals.
+	this.end = new Date(end.getTime());
+
+	if (this.start.compareTo(this.end)>0){
+
+		throw new IllegalArgumentException(start+" after "+end)
+
+	}
+
+}
+//Repaired accessors : make defensive copies of internal fields
+public Date start(){
+	return new Date(start.getTime());
+}
+
+public Date end(){
+	return new Date(end.getTime());
+}
+
+}
+
+Item3: Do not use clone method to make a defensive copy of a parameter whose type is subclassable by untrusted parties.Non zero-length   arrays are always mutable.
+
+Item4: Design method signatures carefully
+
+		--Choose method names carefully
+		--Don't go overboard in providing convenience methods
+		--Avoid long parameter lists
+		--For parameter types, favor interfaces over classes(Take Map as an input not hashMap as Map supports hashMap, hashTable,TreeMap)
+		--Prefer two-element enum types to boolean parameters
+
+
+Item5: Use overloading judiciously
+
+//Broken!- What does this program print?
+
+public class CollectionClassifier{
+	
+	public static String classify(Set<?> s){
+		return "Set";
+	}
+
+	public static String classify(List<?> lst){
+		return "List";
+	}
+
+	public static String classify(Coolection<?> c){
+
+		return "Unknown collection"
+	}
+
+	public static void main (String[] args){
+	 	Collection<?> [] collections = {new HashSet<String>(),new ArrayList<BigInteger>(),new HashMap<String,String>().values()}
+	 	for(Collection<?> c: collections ){
+	 	System.out.println(classify(c))
+	 	}
+
+
+	}
+}
+
+
+The above code prints "Unknown collection" thrice , because the classify method is overloaded and the choice of which overloading to invoke is made the compile time. For all three iterations of the loop , the compile-time type of the parameter is Collection<?>. The runtime type is different in each iteration.Because the compile time type of the parameter is different , the only applicable overloading is the third one and this overloading is invoked in each iteration of the loop.
+
+TO FIX THE ABOVE ISSUE
+
+Replace alll three overloading of classify with a single method that does an explicit instanceOf test:
+
+public static String classify(Collection<?> c){
+	return c instanceOf Set? "set":c instanceOf List?"List":"Unkown Collection";
+	
+}
+
+
+
+SELECTION AMONG OVERLOADED METHODS IS STATIC, WHILE SELECTION AMONG OVERRIDEN METHODS IS DYNAMIC.
+
+A SAFE, A CONSERVATIVE POLICY IS NEVER TO EXPORT TWO OVERLOADINGS WITH THE SAME NUMBER OF PARAMETERS. IF A METHOD USES VARARGS, NOT OVERLOAD IT AT ALL.
+
+CONSTRUCTORS CAN'T BE OVERRIDEN
+
+
+class Wine{
+	String name(){return "Wine";}
+}
+
+class SparklingWine extends Wine{
+	@Override
+	String name(){return "sparkling wine";}
+}
+
+class Champagne extends SparklingWine{
+	@Override
+	String name(){return "champagne";}
+}
+
+public static void main(String[]args){
+	Wine[] wines = {new Wine(), new SparklingWine(), new Champagne()};
+	for(Wine wine: wines){
+     System.out.println(wine.name());
+	}
+}
+
+This program prints out wine, sparkling wine, champagne even though the compile time type of the instance is Wine in each iteration of the loop.The compile-time type of the object has no effect on which method is executed when an ovveriden method is invoked; the "most specific" overriding method always gets executed. Now compare this to overloading where the runtime type of an object has no effect on which overloading is executed; the selection is made at the compile time, based entirely on the compile-time types of the parameters. The correct version of an overrridden method is chosen at the runtime based on the runtime type of the object on which the method is invoked.
+
+	
+
+

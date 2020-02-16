@@ -1,0 +1,105 @@
+Chapter 3
+
+Classes and Interfaces
+
+Item1: Minimize the accessibility of classes and members
+
+ --Rule 1: Implement encapsulation: Hide the internal data and implementation details across the modules. Communicate through the Apis
+           Decouple the modules so that they can be developed, tested, optimized, used, understood, modified in isolation.
+
+ --Rule 2: Access Control Methods: Make each class or member as inaccessible as possible
+ 		   --private: memeber is accessible from only the top-level class where it is declared
+ 		   --package-private(default access): member is accessbile from any class in the package where it is declared
+ 		   --protected: member is accessible from subclasses of the class where it is declared and from any class in the package 
+			 where it is declared
+		   --public: member is accessible from anywhere
+
+ --Rule 3 : Instance fields should never be public
+            Cons: By making field public, anything can be stored in the field. Anyone can modify it and it's not thread safe, even if a field is final and refers to an immutable object, by making the field public you give up the flexibilty to switch to a new internal data representation in which the field does not exist.
+
+ --Rule 4 : You can expose constants via public static final fields.
+
+ --Rule 5 : Non-zero length array is always mutable.
+  			//Potential security hole
+  			public static final Thing[] VALUES = {....};
+
+  			//Fix 
+  			private static final Things[] PRIVATE_VALUES ={......};
+
+  			public static final List<Thing> VALUES = Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));
+
+  			//OR
+
+  			public static final Thing[] values{ return PRIVATE_VALUES.clone()};
+
+
+ Item2:  In public classes, use accessor methods, not public fields
+  		 
+  --Rule 1: --Encapsulation of data by accessor methods(getters) and mutators(setters) to preserve the flexibility to change the class's
+  			internal representation.
+  			class Point{
+  				private double x;
+  				private double y;
+
+  				public Point(double x, double y){
+
+  					this.x = x;
+  					this.y = y;
+
+  				}
+
+  				public double getX(){return x;}
+  				public double getY(){return y;}
+
+  				public void setX(double x){this.x = x};
+  				public void setY(double y){this.y = y};
+
+  			}
+ 
+ Item3: Minimize mutability
+
+  -- Rules : --To make a class immutable
+  				Don't provide any method that modify the object's state (known as mutators)
+  				Ensure that class can't be extended: Can do that by making the class final
+  				Make all fields final
+  				Make all fields private 
+  				Ensure exclusive access to any mutable components: If your class has any fields that refers to muatble objects, make defensive copies in constructors, accessors and readObject methods.
+
+ -- Immutable objects are thread-safe, they require no synchronization, therefore immutable objects can be shared freely.
+ -- To resuse the immutable classes, 
+ 		--they should provide public static final fields for frequently used values.
+ 		--they can provide static factories that cache frequently requested instances to avoid creating new instances, thus reducing memory footprint and garbage collection costs. 
+
+ 		//Immutable class with static factories instead of constructors
+
+ 		public class Complex{
+ 		 private final double re ;
+ 		 private final double im;
+
+ 		 private Complex(double re, double final){
+ 		   this.re = re;
+ 		   this.im = im;
+ 		 }
+
+ 		public static Complex valueOf(double re, double im){
+ 			return new Complex(re,im);
+
+ 		}
+ 		}
+
+ -- Not only you can share immutable objects, but you can share their internals
+ -- Only real disadvantage of immutable classes is that they require a separate object for each distinct value
+
+
+ Item4: Favor composition over inheritance
+        Ineritance violates encapsulation as subclass depends on the implemntation of its SuperClass for its proper function.
+
+
+
+
+
+
+
+
+		   	  
+

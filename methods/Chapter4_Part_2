@@ -1,0 +1,43 @@
+Chapter4_Part_2
+
+Methods
+
+Item1: Use varargs judiciously
+// The right way to use varargs to pass one or more arguments
+
+public static int min(int firstArg, int ... remainingArgs){
+	int min = firstArg;
+
+	for(int arg : remainingArgs){
+		if(arg<min){
+			min=arg;
+			return min;
+		}
+	}
+}
+
+Don't retrofit every method that has a final array parameter ; use varargs only when a call really operates on a variable-length sequence of values.
+
+Item2: Return empty arrays or collections, not nulls
+
+//the right way to return an array from a collection
+
+private final List<Cheese> cheeseInStock =...;
+
+private static final Cheese[] EMPTY_CHEESE_AARAY = new Cheese[0];
+
+public Cheese[] getCheeses(){
+	return cheeseInStock.toArray(EMPTY_CHEESE_AARAY)
+}
+
+//the right way to return a copy of collection
+
+public List<Cheese> getCheeseList(){
+	if(cheeseInStock.isEmpty()){
+		return Collections.emptyList();
+	}
+	else{
+		return new ArrayList<Cheese>(cheeseInStock)
+	} 
+		
+}
